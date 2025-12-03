@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace SamLaundry.Models
+namespace API_Laundry.Models
 {
     public class ApplicationUser : IdentityUser
     {
-        // Example: public string FullName { get; set; }
-        
+        public string NamaLengkap { get; set; }
+        public string NomorTelepon { get; set; }
     }
 }
