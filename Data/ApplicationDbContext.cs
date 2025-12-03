@@ -10,5 +10,7 @@ namespace API_Laundry.Data
             : base(options)
         {
         }
+
+        public DbSet<CuciSepatu> CuciSepatu { get; set; }
     }
 }

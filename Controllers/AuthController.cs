@@ -89,6 +89,7 @@ public class AuthController : ControllerBase
             // 2. Berikan token ke client
             return Ok(new 
             { 
+                Message = "Login berhasil.",
                 Token = token,
                 Expires = DateTime.Now.AddDays(7) // Contoh masa berlaku token
             });
@@ -147,7 +148,7 @@ public class AuthController : ControllerBase
             }
         }
 
-        return Ok("Roles berhasil dibuat.");
+        return Ok(new { Message = "Roles berhasil dibuat." });
     }
     // ------------------------------------------------------------------
     //                         ACTION CREATE ADMIN
@@ -169,7 +170,7 @@ public class AuthController : ControllerBase
         {
             await _userManager.AddToRoleAsync(user, "Admin");
 
-            return Ok("Admin berhasil dibuat.");
+            return Ok(new { Message = "Admin berhasil dibuat." });
         }
 
         return BadRequest(result.Errors);
@@ -177,7 +178,7 @@ public class AuthController : ControllerBase
     // ------------------------------------------------------------------
     //                         ACTION GET USER
     // ------------------------------------------------------------------
-    [HttpGet("me")]
+    [HttpGet("GETuserByLogin")]
     [Authorize]
     public async Task<IActionResult> GetCurrentUser()
     {
@@ -201,4 +202,61 @@ public class AuthController : ControllerBase
         });
     }
 
+    // ------------------------------------------------------------------
+    //                           ACTION GET ALL USERS
+    // ------------------------------------------------------------------
+    [HttpGet("GETallUsers")]
+    [Authorize(Roles = "Admin,ADMIN")]
+    public async Task<IActionResult> GetAllUsers()
+    {
+        var users = _userManager.Users.ToList();
+        var list = users.Select(u => new
+        {
+            u.Id,
+            u.UserName,
+            u.Email,
+            u.NamaLengkap,
+            u.NomorTelepon
+        }).ToList();
+        return Ok(list);
+    }
+
+    // ------------------------------------------------------------------
+    //                         ACTION GET USERS BY ROLE
+    // ------------------------------------------------------------------
+    [HttpGet("byrole/{role}")]
+    [Authorize(Roles = "Admin,ADMIN")]
+    public async Task<IActionResult> GetUsersByRole(string role)
+    {
+        var usersInRole = await _userManager.GetUsersInRoleAsync(role);
+        var list = usersInRole.Select(u => new
+        {
+            u.Id,
+            u.UserName,
+            u.Email,
+            u.NamaLengkap,
+            u.NomorTelepon
+        }).ToList();
+        return Ok(list);
+    }
+
+    // ------------------------------------------------------------------
+    //                         ACTION GET USER BY ID
+    // ------------------------------------------------------------------
+    [HttpGet("byid/{id}")]
+    [Authorize]
+    public async Task<IActionResult> GetUserById(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null)
+            return NotFound("User not found");
+        return Ok(new
+        {
+            user.Id,
+            user.UserName,
+            user.Email,
+            user.NamaLengkap,
+            user.NomorTelepon
+        });
+    }
 }
